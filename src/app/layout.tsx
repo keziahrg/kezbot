@@ -26,14 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} antialiased grid grid-cols-1 grid-rows-[20px_1fr_20px] min-h-full items-center justify-center`}
+        className={`${geistSans.variable} grid min-h-full grid-cols-1 grid-rows-[20px_1fr_20px] items-center justify-center antialiased`}
       >
-        <header className="flex flex-row px-5 max-w-2xl w-full mx-auto">
+        <header className="mx-auto flex w-full max-w-2xl flex-row px-5">
           <Link href="/" aria-label="Home" className="block">
             <h1>Kezbot</h1>
           </Link>
         </header>
-        <main className="flex flex-col px-5 max-w-2xl w-full mx-auto">
+        <main className="mx-auto flex w-full max-w-2xl flex-col px-5">
           {children}
         </main>
         <Analytics />

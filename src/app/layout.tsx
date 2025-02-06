@@ -24,14 +24,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} grid min-h-full grid-cols-1 grid-rows-[20px_1fr_20px] items-center justify-center antialiased`}
+        className={`${geistSans.variable} relative flex h-full min-h-full flex-col justify-center antialiased`}
       >
-        <Header />
-        <main className="mx-auto flex w-full max-w-2xl flex-col px-5">
-          {children}
-        </main>
+        <Header className="absolute inset-x-0 top-0 z-50" />
+        <main className="flex h-full flex-grow flex-col pt-24">{children}</main>
         <Analytics />
       </body>
     </html>

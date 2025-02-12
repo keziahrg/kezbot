@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import Header from "@/components/header";
 import { PreloadResources } from "@/components/preload-resources";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +26,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <PreloadResources />
       <body
         className={`${geistSans.variable} relative flex h-full min-h-full flex-col justify-center antialiased`}
       >
-        <Header className="absolute inset-x-0 top-0 z-50" />
-        <main className="flex h-full flex-grow flex-col pt-24">{children}</main>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+        >
+          <Header className="absolute inset-x-0 top-0 z-50" />
+          <main className="flex h-full flex-grow flex-col pt-24">
+            {children}
+          </main>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

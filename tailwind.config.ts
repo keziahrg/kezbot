@@ -13,7 +13,7 @@ export default {
     extend: {
       container: {
         center: true,
-        padding: "1.25rem",
+        padding: "1rem",
         screens: ["42rem"],
       },
       colors: {

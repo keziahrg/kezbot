@@ -37,9 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header className="absolute inset-x-0 top-0 z-50" />
-          <main className="flex h-full flex-grow flex-col pt-24">
-            {children}
-          </main>
+          <main className="flex h-full flex-grow flex-col">{children}</main>
         </ThemeProvider>
         <Analytics />
       </body>

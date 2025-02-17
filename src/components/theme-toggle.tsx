@@ -9,14 +9,14 @@ export const ThemeToggle = ({
   className,
   ...props
 }: HTMLAttributes<HTMLButtonElement>) => {
-  const [mounted, setMounted] = useState<boolean>(false);
-
   const { resolvedTheme, setTheme } = useTheme();
-  const oppositeTheme = resolvedTheme === "dark" ? "light" : "dark";
+  const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => setMounted(true), []);
 
   if (!mounted) return null;
+
+  const oppositeTheme = resolvedTheme === "dark" ? "light" : "dark";
 
   const handleOnClick = () => {
     setTheme(oppositeTheme);
@@ -26,7 +26,7 @@ export const ThemeToggle = ({
     <button
       aria-label={`Change theme from ${resolvedTheme} to ${oppositeTheme}`}
       onClick={handleOnClick}
-      className={cn("flex place-items-center text-xl", className)}
+      className={cn("flex items-center justify-center text-xl", className)}
       {...props}
     >
       {resolvedTheme === "dark" ? (

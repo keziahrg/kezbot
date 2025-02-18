@@ -66,6 +66,15 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        "slide-up": "slide 0.35s linear",
+      },
+      keyframes: {
+        slide: {
+          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "100%": { transform: "translateY(0px)", opacity: "1" },
+        },
+      },
     },
   },
   plugins: [tailwindcssAnimate],

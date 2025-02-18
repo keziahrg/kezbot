@@ -7,27 +7,29 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { generateId } from "ai";
+import { generateId, Message as MessageProps } from "ai";
 import { useToast } from "@/hooks/use-toast";
+
+const initialMessages = [
+  {
+    id: generateId(),
+    role: "assistant",
+    content:
+      "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
+    parts: [
+      {
+        type: "text",
+        text: "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
+      },
+    ],
+  },
+] as MessageProps[];
 
 export default function Home() {
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState<boolean>(true);
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
-    initialMessages: [
-      {
-        id: generateId(),
-        role: "assistant",
-        content:
-          "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
-        parts: [
-          {
-            type: "text",
-            text: "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
-          },
-        ],
-      },
-    ],
+    initialMessages,
     maxSteps: 5,
   });
   const { toast } = useToast();

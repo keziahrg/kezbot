@@ -6,7 +6,7 @@ export const Message = ({ role, parts }: MessageProps) => {
     <div
       aria-label={`${role === "user" ? "You" : "Kezbot"} said:`}
       className={cn(
-        "w-fit max-w-[70%] whitespace-pre-wrap rounded-lg bg-foreground p-4 text-background",
+        "animate-slide-up w-fit max-w-[70%] whitespace-pre-wrap rounded-lg bg-foreground p-4 text-background",
         role === "user"
           ? "ml-auto mr-0 rounded-br-none bg-foreground text-right"
           : "ml-0 mr-auto rounded-bl-none"

@@ -69,9 +69,9 @@ export default function Home() {
   }, [status, toast]);
 
   return (
-    <div className="relative h-full overflow-y-hidden">
-      <div className="h-full space-y-4 overflow-y-auto pb-[120px] pt-24">
-        <div className="container space-y-3">
+    <div className="relative h-full">
+      <div className="flex h-full flex-col-reverse gap-y-4 overflow-y-auto">
+        <div className="container flex-grow space-y-3 pb-[120px] pt-24">
           {messages.map((message) => (
             <Message key={message.id} {...message} />
           ))}

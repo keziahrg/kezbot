@@ -1,19 +1,36 @@
 "use client";
 
 import { Icon } from "@/components/icon";
+import { Message } from "@/components/message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { generateId } from "ai";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState<boolean>(true);
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      maxSteps: 5,
-    });
+  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+    initialMessages: [
+      {
+        id: generateId(),
+        role: "assistant",
+        content:
+          "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
+        parts: [
+          {
+            type: "text",
+            text: "Hey! I'm Kezbot, your go-to source for information about Keziah Rackley-Gale.",
+          },
+        ],
+      },
+    ],
+    maxSteps: 5,
+  });
+  const { toast } = useToast();
 
   const handleOnScrollButtonClick = () => {
     if (scrollAnchorRef.current) {
@@ -27,36 +44,45 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const theRef = scrollAnchorRef.current;
+    const scrollAnnchor = scrollAnchorRef.current;
     const observer = new IntersectionObserver(callback, {
       root: null,
       rootMargin: "0px 0px -120px 0px",
       threshold: 1.0,
     });
 
-    if (theRef) observer.observe(theRef);
+    if (scrollAnnchor) observer.observe(scrollAnnchor);
 
     return () => {
-      if (theRef) observer.unobserve(theRef);
+      if (scrollAnnchor) observer.unobserve(scrollAnnchor);
     };
   }, [scrollAnchorRef]);
 
+  useEffect(() => {
+    if (status === "error") {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+    }
+  }, [status, toast]);
+
   return (
-    <div className="relative h-full overflow-y-hidden pb-[104px] pt-[65px]">
-      <div className="h-full space-y-4 overflow-y-auto pb-4 pt-8">
-        <div className="container">
-          {messages.map((m) => (
-            <div key={m.id} className="whitespace-pre-wrap">
-              <div>
-                <div className="font-bold">{m.role}</div>
-                <p>{m.content}</p>
-              </div>
-            </div>
+    <div className="relative h-full overflow-y-hidden">
+      <div className="h-full space-y-4 overflow-y-auto pb-[120px] pt-24">
+        <div className="container space-y-3">
+          {messages.map((message) => (
+            <Message key={message.id} {...message} />
           ))}
-          <div ref={scrollAnchorRef} className="h-1 w-full" />
+          <div ref={scrollAnchorRef} className="w-full">
+            {status === "streaming" && (
+              <Icon name="lucide/loader-circle" className="animate-spin" />
+            )}
+          </div>
         </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 z-50 border-t bg-background/60 py-2.5 backdrop-blur-md">
+      <div className="absolute inset-x-0 bottom-0 z-50 bg-background/75 py-2.5 backdrop-blur-md">
         <div className="container relative flex flex-col gap-y-2.5">
           <Button
             disabled={inView}
@@ -85,12 +111,11 @@ export default function Home() {
                 onChange={handleInputChange}
                 required
                 spellCheck={false}
+                disabled={status !== "ready"}
               />
               <Button
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 type="submit"
-                disabled={isLoading}
-                aria-disabled={isLoading}
                 size="icon"
               >
                 <Icon name="lucide/send" />
@@ -98,7 +123,7 @@ export default function Home() {
               </Button>
             </div>
           </form>
-          <p className="text-center text-xs font-medium text-gray-500">
+          <p className="text-center text-xs font-medium text-gray-500 dark:text-gray-400">
             Kezbot has been known to hallucinate from time to time.
           </p>
         </div>

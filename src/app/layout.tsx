@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Header from "@/components/header";
 import { PreloadResources } from "@/components/preload-resources";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "KezBot",
+  title: "Kezbot",
   robots: {
     index: false,
     follow: false,
@@ -38,6 +39,7 @@ export default function RootLayout({
         >
           <Header className="absolute inset-x-0 top-0 z-50" />
           <main className="flex h-full flex-grow flex-col">{children}</main>
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>

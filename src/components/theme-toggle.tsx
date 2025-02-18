@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { Icon } from "./icon";
 import { HTMLAttributes, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 export const ThemeToggle = ({
   className,
@@ -23,10 +24,12 @@ export const ThemeToggle = ({
   };
 
   return (
-    <button
+    <Button
+      size="icon"
+      variant="ghost"
       aria-label={`Change theme from ${resolvedTheme} to ${oppositeTheme}`}
       onClick={handleOnClick}
-      className={cn("flex items-center justify-center text-xl", className)}
+      className={cn("rounded-full text-xl", className)}
       {...props}
     >
       {resolvedTheme === "dark" ? (
@@ -34,6 +37,6 @@ export const ThemeToggle = ({
       ) : (
         <Icon name="lucide/sun" />
       )}
-    </button>
+    </Button>
   );
 };

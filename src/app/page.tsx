@@ -27,6 +27,7 @@ const initialMessages = [
 
 export default function Home() {
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState<boolean>(true);
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     initialMessages,
@@ -70,9 +71,30 @@ export default function Home() {
     }
   }, [status, toast]);
 
+  useEffect(() => {
+    const listener = () => {
+      if (chatWindowRef.current) {
+        chatWindowRef.current.scrollTo({
+          // Scrolls up (since flex-col-reverse on our chatWindowRef element flips it)
+          top: -chatWindowRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    document.addEventListener("scrollToTop", listener);
+
+    return () => {
+      document.removeEventListener("scrollToTop", listener);
+    };
+  }, []);
+
   return (
     <div className="relative h-full">
-      <div className="flex h-full flex-col-reverse gap-y-4 overflow-y-auto">
+      <div
+        ref={chatWindowRef}
+        className="flex h-full flex-col-reverse gap-y-4 overflow-y-auto"
+      >
         <div className="container flex-grow space-y-3 pb-[120px] pt-24">
           {messages.map((message) => (
             <Message key={message.id} {...message} />

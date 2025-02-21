@@ -2,6 +2,7 @@
 export type IconName =
 	| "lucide/arrow-down"
 	| "lucide/loader-circle"
+	| "lucide/mic"
 	| "lucide/moon"
 	| "lucide/send"
 	| "lucide/sun";

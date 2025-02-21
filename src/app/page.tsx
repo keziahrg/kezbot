@@ -1,14 +1,26 @@
 "use client";
 
 import { Icon } from "@/components/icon";
-import { Message } from "@/components/message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { generateId, Message as MessageProps } from "ai";
 import { useToast } from "@/hooks/use-toast";
+import { useInView } from "@/hooks/use-in-view";
+import { LoadingSpinner } from "@/components/loading-spinner";
+import {
+  Chat,
+  ChatContent,
+  ChatFooter,
+  ChatMessage,
+  ChatMessagesList,
+  ChatScrollAnchor,
+  ChatScrollToBottomButton,
+} from "@/components/chat";
+import { Paragraph } from "@/components/paragraph";
+import { Label } from "@/components/ui/label";
 
 const initialMessages = [
   {
@@ -26,40 +38,35 @@ const initialMessages = [
 ] as MessageProps[];
 
 export default function Home() {
-  const scrollAnchorRef = useRef<HTMLDivElement>(null);
-  const chatWindowRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState<boolean>(true);
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
-    initialMessages,
-    maxSteps: 5,
-  });
+  const { messages, input, handleInputChange, handleSubmit, status, setInput } =
+    useChat({
+      initialMessages,
+      maxSteps: 5,
+    });
   const { toast } = useToast();
+  const { inView, inViewRef } = useInView();
+  const speechRecognitionRef = useRef<SpeechRecognition>(null);
+  const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] =
+    useState<boolean>(true);
+  const [isSpeechToTextActive, setIsSpeechToTextActive] =
+    useState<boolean>(false);
+  const [inputStatus, setInputStatus] = useState<
+    "waitingOnInput" | "readyToSubmit"
+  >("waitingOnInput");
 
-  const handleOnScrollButtonClick = () => {
-    if (scrollAnchorRef.current) {
-      scrollAnchorRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const callback = (entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries;
-    setInView(entry.isIntersecting);
-  };
+  useLayoutEffect(() => {
+    setIsSpeechRecognitionSupported(
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+    );
+  }, []);
 
   useEffect(() => {
-    const scrollAnnchor = scrollAnchorRef.current;
-    const observer = new IntersectionObserver(callback, {
-      root: null,
-      rootMargin: "0px 0px -120px 0px",
-      threshold: 1.0,
-    });
-
-    if (scrollAnnchor) observer.observe(scrollAnnchor);
-
-    return () => {
-      if (scrollAnnchor) observer.unobserve(scrollAnnchor);
-    };
-  }, [scrollAnchorRef]);
+    if (!isSpeechToTextActive && input && input.length > 0) {
+      setInputStatus("readyToSubmit");
+    } else {
+      setInputStatus("waitingOnInput");
+    }
+  }, [isSpeechToTextActive, input]);
 
   useEffect(() => {
     if (status === "error") {
@@ -71,72 +78,121 @@ export default function Home() {
     }
   }, [status, toast]);
 
-  useEffect(() => {
-    const listener = () => {
-      if (chatWindowRef.current) {
-        chatWindowRef.current.scrollTo({
-          // Scrolls up (since flex-col-reverse on our chatWindowRef element flips it)
-          top: -chatWindowRef.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }
-    };
+  const handleOnScrollToBottomButtonClick = () => {
+    inViewRef?.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    document.addEventListener("scrollToTop", listener);
+  const handleOnClick = () => {
+    if (isSpeechToTextActive) {
+      speechRecognitionRef?.current?.stop();
+      setIsSpeechToTextActive(false);
+      return;
+    }
 
-    return () => {
-      document.removeEventListener("scrollToTop", listener);
-    };
-  }, []);
+    try {
+      const SpeechRecognition =
+        window.SpeechRecognition ?? window.webkitSpeechRecognition;
+
+      speechRecognitionRef.current = new SpeechRecognition();
+      speechRecognitionRef.current.continuous = true;
+      speechRecognitionRef.current.interimResults = false;
+
+      speechRecognitionRef.current.onstart = function () {
+        setIsSpeechToTextActive(true);
+      };
+
+      let finalTranscript = "";
+
+      speechRecognitionRef.current.onresult = function (event) {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + " ";
+            setInput(finalTranscript);
+          }
+        }
+      };
+
+      speechRecognitionRef.current.onerror = function (event) {
+        speechRecognitionRef?.current?.abort();
+        setIsSpeechToTextActive(false);
+
+        if (event.error === "not-allowed") {
+          console.warn("Microphone permission denied");
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description:
+              "Microphone permission was denied. Allow microphone access to continue.",
+          });
+        } else if (event.error === "service-not-allowed") {
+          console.warn("Speech recognition not allowed by the browser");
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description:
+              "Speech recognition not allowed by the browser. Use a different browser to continue.",
+          });
+        } else {
+          console.error("Speech recognition error:", event.error);
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: "Voice to text failed.",
+          });
+        }
+
+        return;
+      };
+
+      speechRecognitionRef.current.start();
+    } catch (error) {
+      console.error("handleOnClick error:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong",
+        description: "Voice to text failed. Please try a different browser.",
+      });
+    }
+  };
 
   return (
-    <div className="relative h-full">
-      <div
-        ref={chatWindowRef}
-        className="flex h-full flex-col-reverse gap-y-4 overflow-y-auto"
-      >
-        <div className="container flex-grow space-y-3 pb-[120px] pt-24">
+    <Chat>
+      <ChatContent>
+        <ChatMessagesList className="pb-[120px] pt-24">
           {messages.map((message) => (
-            <Message key={message.id} {...message} />
+            <ChatMessage key={message.id} {...message} />
           ))}
-          <div ref={scrollAnchorRef} className="w-full">
-            {status === "streaming" && (
-              <Icon name="lucide/loader-circle" className="animate-spin" />
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 z-50 bg-background/75 py-2.5 backdrop-blur-md">
-        <div className="container relative flex flex-col gap-y-2.5">
-          <Button
+          <ChatScrollAnchor ref={inViewRef}>
+            {status === "streaming" && <LoadingSpinner />}
+          </ChatScrollAnchor>
+          <ChatScrollToBottomButton
             disabled={inView}
             aria-disabled={inView}
-            onClick={handleOnScrollButtonClick}
-            className={cn(
-              "absolute -top-full right-5 z-50 -translate-y-1/4 rounded-full !opacity-0 transition-all",
-              !inView && "!opacity-1 -translate-y-1/2"
-            )}
-            size="icon"
-          >
-            <Icon name="lucide/arrow-down" />
-            <span className="sr-only">Scroll to bottom</span>
-          </Button>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="message" className="sr-only">
-              Message
-            </label>
-            <div className="relative">
-              <Input
-                className="pr-14"
-                name="message"
-                id="message"
-                placeholder="Message Kezbot"
-                value={input}
-                onChange={handleInputChange}
-                required
-                spellCheck={false}
-                disabled={status !== "ready"}
-              />
+            className={cn("!opacity-0", !inView && "!opacity-1")}
+            onClick={handleOnScrollToBottomButtonClick}
+          />
+        </ChatMessagesList>
+      </ChatContent>
+      <ChatFooter>
+        <div className="container relative flex flex-col gap-y-2.5">
+          <form onSubmit={handleSubmit} className="relative">
+            <Label htmlFor="message">Message</Label>
+            <Input
+              className="pr-14"
+              name="message"
+              id="message"
+              placeholder="Message Kezbot"
+              value={input}
+              onChange={handleInputChange}
+              required
+              spellCheck={false}
+              autoComplete="false"
+              disabled={status !== "ready"}
+            />
+            {!isSpeechRecognitionSupported ||
+            inputStatus === "readyToSubmit" ? (
               <Button
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 type="submit"
@@ -145,13 +201,28 @@ export default function Home() {
                 <Icon name="lucide/send" />
                 <span className="sr-only">Send message</span>
               </Button>
-            </div>
+            ) : (
+              <Button
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                type="button"
+                size="icon"
+                onClick={handleOnClick}
+              >
+                <Icon
+                  name="lucide/mic"
+                  className={cn(isSpeechToTextActive && "text-red")}
+                />
+                <span className="sr-only">
+                  {`Record${isSpeechToTextActive && "ing"} `}message
+                </span>
+              </Button>
+            )}
           </form>
-          <p className="text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+          <Paragraph variant="disclaimer" alignment="center">
             Kezbot has been known to hallucinate from time to time.
-          </p>
+          </Paragraph>
         </div>
-      </div>
-    </div>
+      </ChatFooter>
+    </Chat>
   );
 }

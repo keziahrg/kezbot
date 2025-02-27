@@ -25,15 +25,31 @@ export const Chat = ({
 export const ChatContent = ({
   children,
   className,
+}: HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex h-full flex-col-reverse gap-y-4 overflow-y-hidden",
+      className
+    )}
+  >
+    {children}
+  </div>
+);
+
+export const ChatMessagesList = ({
+  children,
+  className,
+  ...props
 }: HTMLAttributes<HTMLDivElement>) => {
   const scrollTopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const listener = () => {
+      console.log("hello");
       if (scrollTopRef.current) {
         scrollTopRef.current.scrollTo({
           // Scrolls up (since flex-col-reverse on our chatWindowRef element flips it)
-          top: scrollTopRef.current.scrollHeight,
+          top: -scrollTopRef.current.scrollHeight,
           behavior: "smooth",
         });
       }
@@ -49,24 +65,7 @@ export const ChatContent = ({
   return (
     <div
       ref={scrollTopRef}
-      className={cn(
-        "flex h-full flex-col-reverse gap-y-4 overflow-y-auto",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-};
-
-export const ChatMessagesList = ({
-  children,
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div
-      className={cn("container relative flex-grow space-y-3", className)}
+      className={cn("container flex-grow space-y-3 overflow-y-auto", className)}
       {...props}
     >
       {children}
@@ -129,10 +128,7 @@ export const ChatScrollToBottomButton = ({
   ...props
 }: ButtonProps) => (
   <Button
-    className={cn(
-      "absolute bottom-[120px] right-[1.25rem] z-50 rounded-full transition-all",
-      className
-    )}
+    className={cn("rounded-full transition-all", className)}
     size="icon"
     {...props}
   >

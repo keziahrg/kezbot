@@ -160,19 +160,21 @@ export default function Home() {
   return (
     <Chat>
       <ChatContent>
-        <ChatMessagesList className="pb-[120px] pt-24">
+        <ChatMessagesList className="pb-[118px] pt-24">
           {messages.map((message) => (
             <ChatMessage key={message.id} {...message} />
           ))}
           <ChatScrollAnchor ref={inViewRef}>
             {status === "streaming" && <LoadingSpinner />}
           </ChatScrollAnchor>
-          <ChatScrollToBottomButton
-            disabled={inView}
-            aria-disabled={inView}
-            className={cn("!opacity-0", !inView && "!opacity-1")}
-            onClick={handleOnScrollToBottomButtonClick}
-          />
+          <div className="container absolute bottom-[118px] z-50 flex justify-end px-10">
+            <ChatScrollToBottomButton
+              disabled={inView}
+              aria-disabled={inView}
+              className={cn("!opacity-0", !inView && "!opacity-1")}
+              onClick={handleOnScrollToBottomButtonClick}
+            />
+          </div>
         </ChatMessagesList>
       </ChatContent>
       <ChatFooter>
@@ -219,7 +221,7 @@ export default function Home() {
             )}
           </form>
           <Paragraph variant="disclaimer" alignment="center">
-            Kezbot has been known to hallucinate from time to time.
+            Kezbot has been known to hallucinate.
           </Paragraph>
         </div>
       </ChatFooter>

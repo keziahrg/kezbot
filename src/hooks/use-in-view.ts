@@ -13,7 +13,7 @@ function useInView() {
     const element = inViewRef.current;
     const observer = new IntersectionObserver(callback, {
       root: null,
-      rootMargin: "0px 0px -120px 0px",
+      rootMargin: "0px 0px -118px 0px",
       threshold: 1.0,
     });
 

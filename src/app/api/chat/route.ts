@@ -1,14 +1,10 @@
 import { streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { getIp, ratelimiter } from "@/lib/utils";
+import { openai } from "@/lib/ai/openai";
 
 // Allow streaming responses up to 60 seconds
 export const maxDuration = 60;
-
-const openai = createOpenAI({
-  apiKey: process.env.OPEN_AI_API_KEY,
-});
 
 const payload = z.object({
   messages: z
@@ -61,8 +57,11 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: openai("gpt-4o-mini"),
-      system: "You are a helpful assistant.",
+      system: `You are a helpful assistant. Check your knowledge base before answering any questions.
+      Only respond to questions using information from tool calls.
+      If no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
       messages: messages,
+      tools: {},
     });
 
     return result.toDataStreamResponse();

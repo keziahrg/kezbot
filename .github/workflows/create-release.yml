@@ -6,10 +6,12 @@ on:
       - "v*.*.*"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  pre-release:
+    name: "Production Release"
+    runs-on: "ubuntu-latest"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          title: "Production"

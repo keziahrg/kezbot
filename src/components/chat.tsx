@@ -16,13 +16,11 @@ export const Chat = ({
   children,
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={cn("relative h-full", className)} {...props}>
-      {children}
-    </div>
-  );
-};
+}: HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("relative h-full", className)} {...props}>
+    {children}
+  </div>
+);
 
 export const ChatContent = ({
   children,
@@ -120,47 +118,41 @@ export const ChatScrollAnchor = ({
   ref,
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement> & RefAttributes<HTMLDivElement>) => {
-  return (
-    <div ref={ref} className={cn("w-full", className)} {...props}>
-      {children}
-    </div>
-  );
-};
+}: HTMLAttributes<HTMLDivElement> & RefAttributes<HTMLDivElement>) => (
+  <div ref={ref} className={cn("w-full", className)} {...props}>
+    {children}
+  </div>
+);
 
 export const ChatScrollToBottomButton = ({
   className,
   ...props
-}: ButtonProps) => {
-  return (
-    <Button
-      className={cn(
-        "absolute bottom-[120px] right-[1.25rem] z-50 rounded-full transition-all",
-        className
-      )}
-      size="icon"
-      {...props}
-    >
-      <Icon name="lucide/arrow-down" />
-      <span className="sr-only">Scroll to bottom</span>
-    </Button>
-  );
-};
+}: ButtonProps) => (
+  <Button
+    className={cn(
+      "absolute bottom-[120px] right-[1.25rem] z-50 rounded-full transition-all",
+      className
+    )}
+    size="icon"
+    {...props}
+  >
+    <Icon name="lucide/arrow-down" />
+    <span className="sr-only">Scroll to bottom</span>
+  </Button>
+);
 
 export const ChatFooter = ({
   children,
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div
-      className={cn(
-        "absolute inset-x-0 bottom-0 z-50 bg-background/75 py-2.5 backdrop-blur-md",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-};
+}: HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "absolute inset-x-0 bottom-0 z-50 bg-background/75 py-2.5 backdrop-blur-md",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </div>
+);

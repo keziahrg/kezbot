@@ -32,10 +32,8 @@ export const Paragraph = ({
   className,
   variant,
   ...props
-}: ParagraphProps) => {
-  return (
-    <p className={cn(paragraphVariants({ variant, className }))} {...props}>
-      {children}
-    </p>
-  );
-};
+}: ParagraphProps) => (
+  <p className={cn(paragraphVariants({ variant, className }))} {...props}>
+    {children}
+  </p>
+);

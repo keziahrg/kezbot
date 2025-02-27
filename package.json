@@ -11,6 +11,7 @@
     "type-check": "tsc --project tsconfig.json --pretty --noEmit",
     "add:icons": "npx @sly-cli/sly add",
     "build:icons": "npx tsx ./src/scripts/buildIcons.mts --log=verbose",
+    "drizzle:studio": "npx drizzle-kit studio",
     "drizzle:seed": "npx tsx ./src/lib/db/seed.ts",
     "drizzle:generate": "npx drizzle-kit generate",
     "drizzle:migrate": "npx drizzle-kit migrate"

@@ -1,10 +1,26 @@
-import { streamText } from "ai";
+import { streamText, tool } from "ai";
 import { z } from "zod";
 import { getIp, ratelimiter } from "@/lib/utils";
 import { openai } from "@/lib/ai/openai";
+import { findRelevantContent } from "@/lib/ai/embedding";
 
 // Allow streaming responses up to 60 seconds
 export const maxDuration = 60;
+
+const toolInvocation = z
+  .object({
+    state: z.string(),
+    step: z.number(),
+    toolCallId: z.string(),
+    toolName: z.string(),
+    args: z.object({
+      question: z.string().optional(),
+    }),
+    result: z.array(z.object({ content: z.string() })),
+  })
+  .partial();
+
+const text = z.object({ type: z.string(), text: z.string() }).partial();
 
 const payload = z.object({
   messages: z
@@ -12,9 +28,8 @@ const payload = z.object({
       z.object({
         role: z.string(),
         content: z.string(),
-        parts: z
-          .array(z.object({ type: z.string(), text: z.string() }))
-          .optional(),
+        toolInvocations: z.array(toolInvocation).optional(),
+        parts: z.array(z.union([text, toolInvocation])).nonempty(),
       })
     )
     .min(2),
@@ -61,7 +76,16 @@ export async function POST(req: Request) {
       Only respond to questions using information from tool calls.
       If no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
       messages: messages,
-      tools: {},
+      tools: {
+        getInformation: tool({
+          description:
+            "Get information from your knowledge base to answer questions.",
+          parameters: z.object({
+            question: z.string().describe("The users question."),
+          }),
+          execute: async ({ question }) => findRelevantContent(question),
+        }),
+      },
     });
 
     return result.toDataStreamResponse();

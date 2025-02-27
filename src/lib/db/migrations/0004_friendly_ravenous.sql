@@ -1,0 +1,1 @@
+ALTER TABLE "embeddings" ALTER COLUMN "fact_id" SET NOT NULL;

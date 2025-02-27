@@ -1,7 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { HTMLAttributes, useEffect, useRef, RefAttributes } from "react";
+import {
+  HTMLAttributes,
+  useEffect,
+  useRef,
+  RefAttributes,
+  Fragment,
+} from "react";
 import { Message as MessageProps } from "ai";
 import { Button, ButtonProps } from "./ui/button";
 import { Icon } from "./icon";
@@ -75,25 +81,37 @@ export const ChatMessage = ({
   parts,
   className,
 }: MessageProps & HTMLAttributes<HTMLDivElement>) => {
+  if (!parts || parts.length === 0) return null;
+
   return (
-    <div
-      aria-label={`${role === "user" ? "You" : "Kezbot"} said:`}
-      className={cn(
-        "w-fit max-w-[70%] animate-slide-up whitespace-pre-wrap rounded-lg bg-foreground p-4 text-background",
-        role === "user"
-          ? "ml-auto mr-0 rounded-br-none bg-foreground text-right"
-          : "ml-0 mr-auto rounded-bl-none",
-        className
-      )}
-    >
-      {parts && parts.length > 0
-        ? parts.map((part, index) => {
-            if (part.type === "text") {
-              return <p key={index}>{part.text}</p>;
-            }
-          })
-        : null}
-    </div>
+    <>
+      {parts.map((part, index) => {
+        return (
+          <Fragment key={index}>
+            {part.type === "text" ? (
+              <div
+                aria-label={`${role === "user" ? "You" : "Kezbot"} said:`}
+                className={cn(
+                  "flex w-fit max-w-[70%] animate-slide-up whitespace-pre-wrap rounded-lg bg-foreground p-4 text-background",
+                  role === "user"
+                    ? "ml-auto mr-0 rounded-br-none bg-foreground text-right"
+                    : "ml-0 mr-auto rounded-bl-none",
+                  className
+                )}
+              >
+                <p>{part.text}</p>
+              </div>
+            ) : part.type === "tool-invocation" ? (
+              <div aria-label="Kezbot said:" className="animate-slide-up">
+                <p>
+                  <em>Kezbot is thinking...</em>
+                </p>
+              </div>
+            ) : null}
+          </Fragment>
+        );
+      })}
+    </>
   );
 };
 

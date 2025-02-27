@@ -11,7 +11,9 @@ export const embeddings = pgTable(
   "embeddings",
   {
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    factId: integer("fact_id").references((): AnyPgColumn => facts.id),
+    factId: integer("fact_id")
+      .references((): AnyPgColumn => facts.id)
+      .notNull(),
     vector: vector("vector", { dimensions: 1536 }).notNull(),
   },
   (table) => [

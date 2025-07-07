@@ -16,7 +16,7 @@ const initialFacts = [
   "Keziah has green eyes",
   "Keziah has brown hair",
   "Keziah has a partner named Ruby",
-  "Keziah is a front-end engineer",
+  "Keziah is a frontend-focused full stack developer",
   "Keziah began working as a web developer in November 2019",
   "Keziah works with the following tech stack: React, React Native, TypeScript, Next.js, and Tailwind CSS",
 ];
